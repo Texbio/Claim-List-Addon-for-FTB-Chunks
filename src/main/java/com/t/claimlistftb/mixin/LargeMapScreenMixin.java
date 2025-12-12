@@ -30,7 +30,7 @@ public class LargeMapScreenMixin {
         // Create a custom button that crops and scales the player icon
         playerFinderButton = new SimpleButton(
                 screen,
-                Component.literal("Player Finder"),
+                Component.literal("Claim List"),
                 Icons.PLAYER,
                 (btn, mouse) -> {
                     new PlayerClaimListScreen(screen).openGui();
