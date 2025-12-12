@@ -671,32 +671,49 @@ public class PlayerClaimListScreen extends BaseScreen {
                         // Get current dimension and check if switch needed
                         dev.ftb.mods.ftbchunks.client.map.MapDimension currentDim = newAccessor.getDimension();
                         
+                        // Calculate region grid position
+                        int regionGridX = Math.floorDiv(blockX, 512);
+                        int regionGridZ = Math.floorDiv(blockZ, 512);
+                        
+                        // Store final values for inner lambda
+                        final double finalRegionX = regionX;
+                        final double finalRegionZ = regionZ;
+                        
                         if (!currentDim.dimension.equals(targetDimension)) {
                             // Switch dimension on the NEW screen
                             dev.ftb.mods.ftbchunks.client.map.MapManager.getInstance().ifPresent(manager -> {
                                 dev.ftb.mods.ftbchunks.client.map.MapDimension newDim = manager.getDimension(targetDimension);
                                 newAccessor.setDimension(newDim);
                                 
-                                // Pre-load target region
-                                int regionGridX = Math.floorDiv(blockX, 512);
-                                int regionGridZ = Math.floorDiv(blockZ, 512);
+                                // Pre-load target region to ensure it exists
                                 dev.ftb.mods.ftbchunks.client.map.MapRegion targetRegion = newDim.getRegion(XZ.of(regionGridX, regionGridZ));
                                 targetRegion.getData();
                                 targetRegion.getRenderedMapImage();
                             });
                             
-                            // Refresh and scroll after dimension change
+                            // Refresh widgets after dimension change
                             net.minecraft.client.Minecraft.getInstance().execute(() -> {
-                                newMapScreen.refreshWidgets();
+                                // Must refresh the region panel directly, not just the screen
                                 RegionMapPanel panel = newAccessor.getRegionPanel();
-                                panel.resetScroll();
-                                panel.scrollTo(regionX, regionZ);
+                                panel.refreshWidgets();  // This rebuilds the tile widgets for the new dimension
+                                
+                                // Need another frame delay for widgets to be fully updated
+                                net.minecraft.client.Minecraft.getInstance().execute(() -> {
+                                    panel.resetScroll();
+                                    panel.scrollTo(finalRegionX, finalRegionZ);
+                                });
                             });
                         } else {
-                            // Same dimension, just scroll
+                            // Same dimension - still need to pre-load the target region
+                            dev.ftb.mods.ftbchunks.client.map.MapRegion targetRegion = currentDim.getRegion(XZ.of(regionGridX, regionGridZ));
+                            targetRegion.getData();
+                            targetRegion.getRenderedMapImage();
+                            
+                            // Refresh the panel's widgets directly to include the new region
                             RegionMapPanel panel = newAccessor.getRegionPanel();
+                            panel.refreshWidgets();
                             panel.resetScroll();
-                            panel.scrollTo(regionX, regionZ);
+                            panel.scrollTo(finalRegionX, finalRegionZ);
                         }
                     }
                 }

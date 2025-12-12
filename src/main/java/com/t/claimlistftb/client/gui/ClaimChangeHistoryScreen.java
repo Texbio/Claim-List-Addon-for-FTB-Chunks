@@ -1024,29 +1024,41 @@ public class ClaimChangeHistoryScreen extends BaseScreen {
                             // Get current dimension and check if switch needed
                             dev.ftb.mods.ftbchunks.client.map.MapDimension currentDim = newAccessor.getDimension();
                             
+                            // Calculate region position
+                            dev.ftb.mods.ftblibrary.math.XZ regionPos = dev.ftb.mods.ftblibrary.math.XZ.regionFromBlock(blockX, blockZ);
+                            
                             if (!currentDim.dimension.equals(targetDimension)) {
                                 // Switch dimension on the NEW screen
                                 dev.ftb.mods.ftbchunks.client.map.MapManager.getInstance().ifPresent(manager -> {
                                     dev.ftb.mods.ftbchunks.client.map.MapDimension newDim = manager.getDimension(targetDimension);
                                     newAccessor.setDimension(newDim);
                                     
-                                    // Pre-load target region
-                                    dev.ftb.mods.ftblibrary.math.XZ regionPos = dev.ftb.mods.ftblibrary.math.XZ.regionFromBlock(blockX, blockZ);
+                                    // Pre-load target region to ensure it exists
                                     dev.ftb.mods.ftbchunks.client.map.MapRegion targetRegion = newDim.getRegion(regionPos);
                                     targetRegion.getData();
                                     targetRegion.getRenderedMapImage();
                                 });
                                 
-                                // Refresh and scroll after dimension change
+                                // Refresh panel widgets and scroll after dimension change
                                 Minecraft.getInstance().execute(() -> {
-                                    newMapScreen.refreshWidgets();
                                     dev.ftb.mods.ftbchunks.client.gui.RegionMapPanel panel = newAccessor.getRegionPanel();
-                                    panel.resetScroll();
-                                    panel.scrollTo(regionX, regionZ);
+                                    panel.refreshWidgets();  // Refresh panel directly, not screen
+                                    
+                                    // Extra frame delay for widgets to update
+                                    Minecraft.getInstance().execute(() -> {
+                                        panel.resetScroll();
+                                        panel.scrollTo(regionX, regionZ);
+                                    });
                                 });
                             } else {
-                                // Same dimension, just scroll
+                                // Same dimension - still need to pre-load the target region
+                                dev.ftb.mods.ftbchunks.client.map.MapRegion targetRegion = currentDim.getRegion(regionPos);
+                                targetRegion.getData();
+                                targetRegion.getRenderedMapImage();
+                                
+                                // Refresh panel widgets directly to include the new region, then scroll
                                 dev.ftb.mods.ftbchunks.client.gui.RegionMapPanel panel = newAccessor.getRegionPanel();
+                                panel.refreshWidgets();
                                 panel.resetScroll();
                                 panel.scrollTo(regionX, regionZ);
                             }
