@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.t.claimlistftb.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "FTBChunksClientMixin",
+    "LargeMapScreenAccessor",
+    "LargeMapScreenMixin",
+    "RegionMapPanelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
