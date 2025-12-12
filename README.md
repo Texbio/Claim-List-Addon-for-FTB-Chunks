@@ -6,7 +6,7 @@ Mod that adds copying a list of claims, claim coordinates, claim list, teleporti
 </br >-Claims grouped by 5 chunks apart in claim list, in history they need to be diagonal/next to eachother.
 </br >-Made sure not to send packets when not needed, it hooks into FTB Chunks so it only request packets on a possible packet loss.
 </br >-100% client side
-</br >-Made with Claude ai
+</br >-Made with Claude ai (still took a while to refine!)
 <hr>
 Claim List</br >
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/1950bd47-2f37-45cd-a40b-68276833b102" />
